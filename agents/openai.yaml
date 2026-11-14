@@ -1,0 +1,14 @@
+interface:
+  display_name: Quantumult X 脚本与配置开发
+  short_description: 依据官方示例开发圈 X 脚本、重写与配置，适配资源解析器单文件导入
+  default_prompt: 使用 $quantumultx-development 帮我开发或检查 Quantumult X 脚本与配置，默认适配 KOP-XIAO
+    资源解析器。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
