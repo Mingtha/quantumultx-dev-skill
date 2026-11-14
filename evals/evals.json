@@ -11,18 +11,25 @@
       "发布地址保留显眼占位并说明替换位置，不编造可访问链接",
       "运行或要求运行 qx-check rewrite 与 parser；说明尚未真机验证"
     ],
-    "must_not": ["使用 $httpClient、$persistentStore", "用正则直接改 JSON 文本", "声称已在设备上验证"]
+    "must_not": [
+      "使用 $httpClient、$persistentStore",
+      "用正则直接改 JSON 文本",
+      "声称已在设备上验证"
+    ]
   },
   {
     "id": "comment-terminated",
     "should_trigger": true,
-    "prompt": "我的 QX 脚本顶部注释里有一行 ^https:\\/\\/cdn\\.demo\\.test\\/.*/config url script-response-body https://my.host/fix.js，资源导入后规则都在，但脚本好像从来没执行，帮我看看。",
+    "prompt": "我的 QX 脚本顶部注释里有一行 ^https:\\/\\/cdn\\.demo\\.test\\/.*/config url script-response-body https://raw.githubusercontent.com/someone/qx/main/fix.js，资源导入后规则都在，但脚本好像从来没执行，帮我看看。",
     "expect": [
       "指出规则里的 .*/ 含 */，提前结束块注释，JS 语法错误导致脚本不运行，而解析器照样提取规则",
       "给出不含 */ 的等价写法（如 .*?\\/ 或 [^/]*\\/）",
       "建议用 qx-check check 或 node --check 复验"
     ],
-    "must_not": ["让用户关闭 MITM 或证书校验", "重写整个脚本"]
+    "must_not": [
+      "让用户关闭 MITM 或证书校验",
+      "重写整个脚本"
+    ]
   },
   {
     "id": "task-not-imported",
@@ -34,19 +41,25 @@
       "注释里的 cron 不使用 */10",
       "任务用 $task.fetch，处理失败、非 200、坏 JSON 和超时，只 $done 一次，迟到回调不再通知"
     ],
-    "must_not": ["声称改一下注释格式任务就能自动导入", "每次运行都通知"]
+    "must_not": [
+      "声称改一下注释格式任务就能自动导入",
+      "每次运行都通知"
+    ]
   },
   {
-    "id": "self-hosted-auth",
+    "id": "stale-script-after-update",
     "should_trigger": true,
-    "prompt": "我自己的服务器托管 QX 脚本，加了鉴权：用一个 request-header 重写给 my.host 的请求加 X-Token。更新资源时日志里有 token，规则也出来了，但随后脚本下载全是 401。为什么？",
+    "prompt": "我改了放在 GitHub 上的 QX 脚本（通过 jsDelivr 的 @main 地址引用），在 QX 里也点了更新资源，规则看起来没变，但手机上跑的明显还是旧逻辑。怎么回事，以后怎么发布才稳？",
     "expect": [
-      "解释更新资源时有两次下载：资源本身与规则里的脚本 URL",
-      "说明脚本本体下载不经过 QX 自身重写，因此带不上请求头，并标注这是单设备实测、需复核",
-      "建议把令牌放进脚本 URL（如签名的版本参数），只发给已鉴权的资源请求",
-      "提醒注入令牌的规则要写成 ^(?:https) 保住锚定，否则解析器去掉 ^ 后可能把令牌发给别的站点"
+      "解释更新资源时有两次下载：资源本身交给解析器提取规则，规则里的脚本 URL 单独下载并按 URL 缓存",
+      "指出规则里的脚本 URL 没变时 QX 可能继续用旧缓存，jsDelivr 等 CDN 的分支地址也可能延迟返回新版",
+      "建议发布时让脚本 URL 随版本变化（版本参数、tag 或提交哈希），并同步更新顶部注释里的脚本 URL",
+      "给出确认方法：在 QX 里查看生成的规则右侧脚本 URL 是否已是新地址"
     ],
-    "must_not": ["建议关闭鉴权或把密码写进公开仓库"]
+    "must_not": [
+      "建议删掉重装 QX 或重置整份配置",
+      "声称点一次更新一定会拿到新脚本"
+    ]
   },
   {
     "id": "config-edit",
@@ -57,13 +70,20 @@
       "沿用已有策略名「代理」，不新建策略、不改 final、不改其他规则",
       "不为纯分流添加 MITM"
     ],
-    "must_not": ["输出整份重写后的配置", "改用 host-keyword"]
+    "must_not": [
+      "输出整份重写后的配置",
+      "改用 host-keyword"
+    ]
   },
   {
     "id": "out-of-scope-surge",
     "should_trigger": false,
     "prompt": "帮我写一个 Surge 的 sgmodule，给某个 App 去广告。",
-    "expect": ["不加载本 skill；若已加载，说明本 skill 面向 QX，只在用户要求迁移到 QX 时介入"],
-    "must_not": ["按 QX 语法交付 Surge 模块"]
+    "expect": [
+      "不加载本 skill；若已加载，说明本 skill 面向 QX，只在用户要求迁移到 QX 时介入"
+    ],
+    "must_not": [
+      "按 QX 语法交付 Surge 模块"
+    ]
   }
 ]

@@ -10,7 +10,7 @@
 - 网络任务与参数：sample-task.js。旧示例头部版本可能早于新增字段，以字段旁说明为准。
 - 原生远程重写：sample-import-rewrite.snippet；资源解析器环境：官方 resource-parser.js。
 - 本机 HTTP 服务：sample-backend.js；一键导入与任务仓库：url-scheme.md、gallery.json。
-- 「实测」条目（脚本本体下载不经过自身重写、解析器丢弃 task_local/http_backend、`^http` 去锚、`^(?:https)` 保留）来自单台设备与上表解析器快照，见 distribution.md、configuration.md；换版本时复核。
+- 「实测」条目（私有托管时脚本本体下载不经过自身重写、解析器丢弃 task_local/http_backend、`^http` 去锚、`^(?:https)` 保留）来自单台设备与上表解析器快照，见 distribution.md、configuration.md；换版本时复核。
 - 单文件提取：用户指定解析器源码中的 Type_Check、isQuanXRewrite、Rewrite_Filter；参数参考该源码开头注释及具体分支。
 
 ## 冲突与版本

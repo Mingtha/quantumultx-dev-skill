@@ -1,12 +1,23 @@
-# KOP-XIAO 解析器与单文件发布
+# 资源解析器与单文件发布
 
-## 固定环境
+## 选择交付方式
 
-用户在 `[general]` 使用：
+默认假设用户在 `[general]` 配置了社区通用的 KOP-XIAO 解析器：
 ```ini
 resource_parser_url = https://fastly.jsdelivr.net/gh/KOP-XIAO/QuantumultX@master/Scripts/resource-parser.js
 ```
-这只是选择解析器。导入重写资源时仍需启用资源解析（配置行 `opt-parser=true`）。不要覆盖用户已有 `[general]`。
+「一个 JS 同时是规则资源和脚本」靠它实现：QX 原生的重写资源只认 `.snippet` 格式，不读 JS 注释。
+
+- 用户配置里是其他解析器地址：沿用，按其实际源码核对行为；下文的具体行为以 KOP-XIAO 为准。
+- 用户还没配置：给出上面这行，说明加到 `[general]`，不要覆盖已有内容。
+- 用户明确不用解析器（少见）：交付两个文件。规则写成官方原生 snippet（无区段名，`hostname` 行可选），脚本单独发布：
+  ```text
+  hostname = api.example.com
+  ^https://api\.example\.com/v1/items(?:\?|$) url script-response-body https://example.com/scripts/items.js
+  ```
+  导入为 `https://example.com/rules/items.snippet, tag=响应处理, enabled=true`。原生加载不经过解析器，开头的 `^` 会保留。
+
+选择了解析器时，导入重写资源仍需启用资源解析（配置行 `opt-parser=true`）。
 
 ## 默认单文件布局
 

@@ -5,11 +5,11 @@ description: 开发、修改、审查和排错 Quantumult X（QuantumultX、Quan
 
 # Quantumult X 开发
 
-## 固定偏好
+## 默认约定
 
-- 用中文沟通。新增代码紧凑且清楚；修改现有文件时保留缩进、换行、引号与组织方式，只做必要修改。
-- 默认使用用户的解析器：`https://fastly.jsdelivr.net/gh/KOP-XIAO/QuantumultX@master/Scripts/resource-parser.js`。不要擅自替换地址或更改全局配置。
-- 对独立重写 JS，默认交付一个可导入的文件：顶部 `/* ... */` 放 QX 原生规则及 hostname，下面放 JS。按 [parser.md](references/parser.md) 操作；不要把这种方式推广为所有配置区段都能自动安装。
+- 用用户提问的语言沟通。新增代码紧凑且清楚；修改现有文件时保留缩进、换行、引号与组织方式，只做必要修改。
+- 资源解析器默认是社区通用的 KOP-XIAO：`https://fastly.jsdelivr.net/gh/KOP-XIAO/QuantumultX@master/Scripts/resource-parser.js`。用户配置里写的是其他地址时沿用用户的，不擅自替换或更改全局配置。
+- 独立重写 JS 默认交付为一个可导入的文件：顶部 `/* ... */` 放 QX 原生规则及 hostname，下面放 JS。按 [parser.md](references/parser.md) 操作；不要把这种方式推广为所有配置区段都能自动安装。用户明确不用解析器时才改交原生 `.snippet` 加脚本文件。
 - 优先最小作用域、最少依赖和原生 QX API。不要为单平台引入大型跨平台代理框架。
 
 ## 工作顺序
@@ -38,6 +38,6 @@ description: 开发、修改、审查和排错 Quantumult X（QuantumultX、Quan
 - 顶部注释、导入、解析参数、跨客户端转换 → [parser.md](references/parser.md)
 - JS API、结束语义、异步、二进制、HTTP Backend → [runtime.md](references/runtime.md)
 - 分流、DNS、任务、资源、MITM、规则锚定 → [configuration.md](references/configuration.md)
-- 发布、缓存与版本、自建服务鉴权、一键导入、任务仓库 → [distribution.md](references/distribution.md)
+- 发布、托管、缓存与版本、一键导入、任务仓库 → [distribution.md](references/distribution.md)
 - 本地运行器、用例格式、抓包转用例、设备验证 → [validation.md](references/validation.md)
 - 官方来源与刷新依据 → [sources.md](references/sources.md)
