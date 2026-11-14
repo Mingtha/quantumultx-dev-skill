@@ -11,7 +11,19 @@
 | 直接构造响应 | script-echo-response | `$done({status, headers, body})` |
 | 等待请求体后构造响应 | script-analyze-echo-response | 官方配置说明其与 echo 的差别是等待请求体 |
 
+| 定时/事件任务 | task_local | 无 `$request`；`$task.fetch` 联网，`$done()` 结束 |
+| 本机 HTTP 服务 | http_backend | `$request.url/path/headers/body`；`$done({status, headers, body})` |
+
 普通重写无改动用 `$done({})`。任务正常结束通常用 `$done()`。合成响应返回完整、有意设计的响应，不套用普通放行模板。
+
+一个文件可以同时承担多种角色（例如既是重写又是任务）：按 `$response`、`$request` 是否存在分支，并让每条分支各自只 `$done` 一次。
+
+## HTTP Backend
+
+官方 sample-backend.js：`[http_backend]` 行写 `脚本URL, tag=…, path=^/前缀/`，请求只交给 path 正则匹配的后端，访问 `http://127.0.0.1:9999/前缀/…`（也可 `localhost`、`quantumult-x`），只在隧道运行时可用。可用 `$request.url/path/headers/body`、`$prefs`、`$task`、`$notify`、`console.log`，返回 `$done({status: "HTTP/1.1 200 OK", headers: {...}, body: "..."})`。
+
+- 对任何 path、方法和坏参数都返回明确的状态码与正文（如 400/404/409），不要只在成功分支 `$done`。
+- 网络扩展有内存限制，后端保持小巧；同机其他 App 也能访问 127.0.0.1，需要时自行校验签名。
 
 `$response.statusCode` 是读入状态码；输出 `status` 按官方示例是 `"HTTP/1.1 200 OK"`。不要互换两者。header 阶段不要假设有 body；request 阶段不要直接访问不存在的 `$response`。
 

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "response-rewrite",
+    "should_trigger": true,
+    "prompt": "这是脱敏后的抓包：GET https://api.demo-app.test/v2/user/profile?lang=zh 返回 {\"code\":0,\"data\":{\"vip\":false,\"name\":\"x\",\"expire\":null}}。写个圈 X 脚本把 vip 改成 true，发布地址先空着。",
+    "expect": [
+      "交付一个 JS：顶部块注释含 [rewrite_local] 的 script-response-body 规则和 [mitm] hostname，下面是脚本",
+      "规则正则转义域名点号并限定路径与 query 边界；脚本内再用锚定正则校验 $request.url",
+      "解析 JSON 并校验 data 为对象、vip 为布尔；缺字段、坏 JSON、非 200 时 $done({}) 原样放行",
+      "保留 name、expire 等非目标字段与类型；每条路径只 $done 一次",
+      "发布地址保留显眼占位并说明替换位置，不编造可访问链接",
+      "运行或要求运行 qx-check rewrite 与 parser；说明尚未真机验证"
+    ],
+    "must_not": ["使用 $httpClient、$persistentStore", "用正则直接改 JSON 文本", "声称已在设备上验证"]
+  },
+  {
+    "id": "comment-terminated",
+    "should_trigger": true,
+    "prompt": "我的 QX 脚本顶部注释里有一行 ^https:\\/\\/cdn\\.demo\\.test\\/.*/config url script-response-body https://my.host/fix.js，资源导入后规则都在，但脚本好像从来没执行，帮我看看。",
+    "expect": [
+      "指出规则里的 .*/ 含 */，提前结束块注释，JS 语法错误导致脚本不运行，而解析器照样提取规则",
+      "给出不含 */ 的等价写法（如 .*?\\/ 或 [^/]*\\/）",
+      "建议用 qx-check check 或 node --check 复验"
+    ],
+    "must_not": ["让用户关闭 MITM 或证书校验", "重写整个脚本"]
+  },
+  {
+    "id": "task-not-imported",
+    "should_trigger": true,
+    "prompt": "我把一个 JS 当重写资源导入了，顶部注释里写了 [task_local] 每 10 分钟跑一次签到检查，但 QX 里没出现这个任务。另外帮我把任务脚本写成：请求 https://api.demo.test/checkin，失败要通知。",
+    "expect": [
+      "说明解析器只把 rewrite/hostname（及 844+ 的分流）带进 QX，task_local 会被丢弃",
+      "给出要手写的 [task_local] 行，或任务仓库 gallery 的方式，并说明手写行不随资源更新",
+      "注释里的 cron 不使用 */10",
+      "任务用 $task.fetch，处理失败、非 200、坏 JSON 和超时，只 $done 一次，迟到回调不再通知"
+    ],
+    "must_not": ["声称改一下注释格式任务就能自动导入", "每次运行都通知"]
+  },
+  {
+    "id": "self-hosted-auth",
+    "should_trigger": true,
+    "prompt": "我自己的服务器托管 QX 脚本，加了鉴权：用一个 request-header 重写给 my.host 的请求加 X-Token。更新资源时日志里有 token，规则也出来了，但随后脚本下载全是 401。为什么？",
+    "expect": [
+      "解释更新资源时有两次下载：资源本身与规则里的脚本 URL",
+      "说明脚本本体下载不经过 QX 自身重写，因此带不上请求头，并标注这是单设备实测、需复核",
+      "建议把令牌放进脚本 URL（如签名的版本参数），只发给已鉴权的资源请求",
+      "提醒注入令牌的规则要写成 ^(?:https) 保住锚定，否则解析器去掉 ^ 后可能把令牌发给别的站点"
+    ],
+    "must_not": ["建议关闭鉴权或把密码写进公开仓库"]
+  },
+  {
+    "id": "config-edit",
+    "should_trigger": true,
+    "prompt": "这是我 QX 配置的一部分：\n[policy]\nstatic=代理, 香港01, 日本01\n[filter_local]\nhost-suffix, google.com, 代理\nfinal, direct\n帮我让 demo-site.test 和它的子域名也走代理。",
+    "expect": [
+      "只增加一条 host-suffix, demo-site.test, 代理，放在 final 之前",
+      "沿用已有策略名「代理」，不新建策略、不改 final、不改其他规则",
+      "不为纯分流添加 MITM"
+    ],
+    "must_not": ["输出整份重写后的配置", "改用 host-keyword"]
+  },
+  {
+    "id": "out-of-scope-surge",
+    "should_trigger": false,
+    "prompt": "帮我写一个 Surge 的 sgmodule，给某个 App 去广告。",
+    "expect": ["不加载本 skill；若已加载，说明本 skill 面向 QX，只在用户要求迁移到 QX 时介入"],
+    "must_not": ["按 QX 语法交付 Surge 模块"]
+  }
+]

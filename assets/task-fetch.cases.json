@@ -1,0 +1,40 @@
+[
+  {
+    "name": "值变化：保存并通知一次",
+    "prefs": { "example_check_last": "old" },
+    "fetch": [{ "response": { "statusCode": 200, "headers": {}, "body": "{\"value\":\"new\"}" } }],
+    "expect": { "done": null, "notify": 1, "fetch": 1, "prefs": { "example_check_last": "new" } }
+  },
+  {
+    "name": "值未变化：不通知",
+    "prefs": { "example_check_last": "same" },
+    "fetch": [{ "response": { "statusCode": 200, "headers": {}, "body": "{\"value\":\"same\"}" } }],
+    "expect": { "done": null, "notify": 0, "prefs": { "example_check_last": "same" } }
+  },
+  {
+    "name": "首次运行：没有旧值也正常保存",
+    "fetch": [{ "response": { "statusCode": 200, "headers": {}, "body": "{\"value\":\"v1\"}" } }],
+    "expect": { "done": null, "notify": 1, "prefs": { "example_check_last": "v1" } }
+  },
+  {
+    "name": "网络失败：结束且不写存储",
+    "prefs": { "example_check_last": "old" },
+    "fetch": [{ "error": "The Internet connection appears to be offline." }],
+    "expect": { "done": null, "notify": 0, "prefs": { "example_check_last": "old" } }
+  },
+  {
+    "name": "HTTP 500：结束且不通知",
+    "fetch": [{ "response": { "statusCode": 500, "headers": {}, "body": "error" } }],
+    "expect": { "done": null, "notify": 0, "prefs": { "example_check_last": null } }
+  },
+  {
+    "name": "坏 JSON：结束且不通知",
+    "fetch": [{ "response": { "statusCode": 200, "headers": {}, "body": "<html>" } }],
+    "expect": { "done": null, "notify": 0 }
+  },
+  {
+    "name": "字段类型不对：结束且不写存储",
+    "fetch": [{ "response": { "statusCode": 200, "headers": {}, "body": "{\"value\":1}" } }],
+    "expect": { "done": null, "notify": 0, "prefs": { "example_check_last": null } }
+  }
+]

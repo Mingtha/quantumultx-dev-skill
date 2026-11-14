@@ -8,10 +8,11 @@
 
 - 根据请求与响应样本开发、修改和排查 QX JavaScript 重写脚本。
 - 默认在 JS 顶部块注释中放置原生重写规则和 `hostname`，便于作为重写资源导入。
-- 检查 MITM、分流、策略组、DNS、远程资源与定时任务配置。
+- 检查 MITM、分流、策略组、DNS、远程资源、定时任务与 HTTP Backend 配置。
+- 交代脚本发布与更新：两次下载与缓存、版本参数、自建服务鉴权、一键导入链接与任务仓库。
 - 区分资源解析参数与脚本运行参数，避免混用 Surge/Loon API。
 - 要求异常放行、精确匹配、最小改动与脱敏日志；修改现有代码时保留原格式。
-- 提供 JSON 响应模板、14 个测试用例和解析器本地检查工具。
+- 提供响应改写与异步任务两个模板（共 21 个用例），以及语法/注释检查、用例运行、多 build 解析器比对、抓包转用例的本地工具。
 
 ## 安装与使用
 
@@ -40,7 +41,7 @@ resource_parser_url = https://fastly.jsdelivr.net/gh/KOP-XIAO/QuantumultX@master
 
 导入包含顶部规则的 JS 时，将其添加到重写资源并开启资源解析（`opt-parser=true`）。顶部注释中的规则必须指向实际发布的脚本 URL。模板里的 example.com 仅为示例。
 
-这种方式不会自动安装任意配置：DNS、证书和定时任务等仍须在对应位置单独配置。详情见 [解析器说明](references/parser.md)。
+这种方式不会自动安装任意配置：解析器会丢弃顶部注释里的 `[task_local]`、`[http_backend]`，DNS、证书等也须在对应位置单独配置。详情见 [解析器说明](references/parser.md) 与 [发布说明](references/distribution.md)。
 
 ## 文件结构
 
@@ -50,29 +51,35 @@ resource_parser_url = https://fastly.jsdelivr.net/gh/KOP-XIAO/QuantumultX@master
 | [references/parser.md](references/parser.md) | 单文件导入与解析参数 |
 | [references/runtime.md](references/runtime.md) | QX API、正文处理与异步控制 |
 | [references/configuration.md](references/configuration.md) | 配置语法、匹配与排错 |
-| [references/validation.md](references/validation.md) | 本地检查与真机验证步骤 |
+| [references/distribution.md](references/distribution.md) | 发布、缓存与版本、一键导入、任务仓库 |
+| [references/validation.md](references/validation.md) | 本地检查、用例格式与真机验证步骤 |
 | [references/sources.md](references/sources.md) | 官方资料、核验日期及快照哈希 |
 | [assets/response-json.js](assets/response-json.js) | 单文件响应重写模板 |
-| [assets/response-json.cases.json](assets/response-json.cases.json) | 模板测试用例 |
-| [scripts/qx-check.cjs](scripts/qx-check.cjs) | 本地同步重写与解析器运行器 |
+| [assets/response-json.cases.json](assets/response-json.cases.json) | 响应模板用例 |
+| [assets/task-fetch.js](assets/task-fetch.js) | 异步任务模板（$task.fetch、$prefs、$notify、超时） |
+| [assets/task-fetch.cases.json](assets/task-fetch.cases.json) | 任务模板用例 |
+| [scripts/qx-check.cjs](scripts/qx-check.cjs) | 本地检查工具：check / rewrite / parser / har |
+| [evals/](evals/) | 改 skill 后回归用的真实请求与评分要点 |
 
 ## 本地检查
 
 需要支持 `Object.hasOwn` 的 Node.js（16.9 或更新版本）。在仓库根目录运行：
 
 ```sh
+node scripts/qx-check.cjs check   assets/response-json.js
 node scripts/qx-check.cjs rewrite assets/response-json.js assets/response-json.cases.json
+node scripts/qx-check.cjs rewrite assets/task-fetch.js assets/task-fetch.cases.json
 ```
 
-从上面的指定地址获取并审阅解析器源码后，可检查整个 JS 文件是否正确提取规则：
+从上面的指定地址获取并审阅解析器源码后，检查整个 JS 文件在 build 844 与 951 下的提取结果：
 
 ```sh
-node scripts/qx-check.cjs parser /path/to/resource-parser.js assets/response-json.js https://example.com/scripts/items.js 951
+node scripts/qx-check.cjs parser /path/to/resource-parser.js assets/response-json.js https://example.com/scripts/items.js --expect expected.txt
 ```
 
-最后一个参数是模拟的 QX build，应按目标设备选择。运行器输出仍需核对规则数量、动作、脚本 URL 和 hostname；非空输出不代表完全正确。
+解析器发出通知视为失败（它用通知报告被忽略的规则）；给 `--expect` 时逐行比对。有抓包时 `har` 模式可生成用例骨架，断言需人工填写，正文需人工脱敏。完整说明见 [validation.md](references/validation.md)。
 
-运行器仅用于可信开发文件，Node `vm` 不是安全隔离；它不会模拟完整 QX、网络或异步任务。模板已通过 14 个本地用例，单文件结构已通过指定解析器提取检查，尚未进行 QX 真机验证。
+运行器仅用于可信开发文件，Node `vm` 不是安全隔离；它不会模拟完整 QX 或网络。模板已通过本地用例，单文件结构已通过指定解析器提取检查，尚未进行 QX 真机验证。
 
 ## 参考与维护
 

@@ -26,6 +26,7 @@ hostname = api.example.com
 
 规则指向这个 JS 自己的真实公开原始内容 URL。示例 URL 不能交付为已发布地址。
 - `/*`、`*/` 单独成行。块内的区段、规则、`hostname` 行从行首开始，不添加 JSDoc 的 `* `，不写 `//`、`;` 或 `#` 前缀。说明与实际规则分开。
+- **块内任何位置都不能出现 `*/`**：cron 的 `*/10`、正则的 `.*/` 会提前结束注释。解析器读的是文本，照样提取出规则；JS 引擎却遇到语法错误，脚本在 QX 里根本不运行。用 `qx-check check` 或 `node --check` 发现；正则改写为 `[^/]*\/` 或 `.*?\/`，cron 列出具体值。
 - 同一个 HTTPS JS 链接可作为“重写资源”导入，解析器提取规则；规则触发时 QX 又将该链接作为 JS 执行，块注释被 JS 引擎忽略。
 - 远程资源示意：
 ```ini
@@ -44,8 +45,8 @@ https://example.com/scripts/items.js, tag=响应处理, opt-parser=true, enabled
 | 原生 rewrite 规则和 hostname | 默认写入顶部块注释，并验证提取结果 |
 | 名称、说明、版本、使用条件 | 给人阅读，不承诺自动变成 UI 元数据 |
 | general、dns、policy、证书 | 不依靠导入该 JS 自动安装；作为独立主配置改动 |
-| task_local | 不承诺由重写导入自动创建任务；单独给任务条目 |
-| 混合分流规则 | 仅有明确需要并核实 build 与解析器后使用；默认独立分流资源 |
+| task_local、http_backend | 解析器会丢弃（实测 844/951），只供用户复制；单独给配置行或任务仓库，见 [distribution.md](distribution.md) |
+| 混合分流规则（`host, x, reject` 等） | build 844 起解析器保留在重写资源里；用户希望单文件交付时可用，按实际解析器输出核对，旧 build 改用独立分流资源 |
 
 ## 两类 URL 参数必须区分
 
@@ -60,4 +61,4 @@ https://example.com/scripts/items.js, tag=响应处理, opt-parser=true, enabled
 
 ## 更新与发布
 
-`@master` 与 CDN 都会变化，记录本次获取日期、SHA-256；出问题时对比用户实际缓存版本。修改脚本时让“导入资源 URL”和“内部脚本 URL”指向预期版本，防止只更新顶部注释而运行旧 JS。使用固定提交或版本仅在发布需求合适时提出；不要擅自替换用户指定的解析器地址。
+`@master` 与 CDN 都会变化，记录本次获取日期、SHA-256；出问题时对比用户实际缓存版本。修改脚本时让“导入资源 URL”和“内部脚本 URL”指向预期版本，防止只更新顶部注释而运行旧 JS；缓存与版本参数见 [distribution.md](distribution.md)。使用固定提交或版本仅在发布需求合适时提出；不要擅自替换用户指定的解析器地址。
