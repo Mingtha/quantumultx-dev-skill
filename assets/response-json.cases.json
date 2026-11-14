@@ -1,0 +1,228 @@
+[
+  {
+    "name": "正常修改且保留其他字段",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"result\":1,\"items\":[1,2],\"ok\":false}"
+    },
+    "expect": {
+      "json": {
+        "result": 0,
+        "items": [
+          1,
+          2
+        ],
+        "ok": false
+      }
+    }
+  },
+  {
+    "name": "缺字段",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"items\":[]}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "已修改",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"result\":0}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "类型不符",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"result\":\"1\"}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "空正文",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": ""
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "无效JSON",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "<html>error</html>"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "null",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "null"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "数组",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "[{\"result\":1}]"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "错误状态",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 500,
+      "headers": {},
+      "body": "{\"result\":1}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "不同方法",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "POST",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"result\":1}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "邻近路径",
+    "request": {
+      "url": "https://api.example.com/v1/items-old",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"result\":1}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "伪后缀",
+    "request": {
+      "url": "https://api.example.com.evil.test/v1/items",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"result\":1}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "HTTP",
+    "request": {
+      "url": "http://api.example.com/v1/items",
+      "method": "GET",
+      "headers": {}
+    },
+    "response": {
+      "statusCode": 200,
+      "headers": {},
+      "body": "{\"result\":1}"
+    },
+    "expect": {
+      "unchanged": true
+    }
+  },
+  {
+    "name": "请求阶段无响应",
+    "request": {
+      "url": "https://api.example.com/v1/items?limit=5",
+      "method": "GET",
+      "headers": {}
+    },
+    "expect": {
+      "unchanged": true
+    }
+  }
+]
